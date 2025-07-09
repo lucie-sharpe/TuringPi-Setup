@@ -1,0 +1,135 @@
+---
+- name: Setup cluster configuration
+  hosts: cluster
+  gather_facts: true
+  become: true
+
+  handlers:
+    - name: reboot-node
+      ansible.builtin.reboot:
+
+  tasks:
+    - name: Enable UART console
+      ansible.builtin.command: raspi-config nonint do_serial_cons 1
+
+    - name: Configure cgroups
+      ansible.builtin.replace:
+        path: /boot/firmware/cmdline.txt
+        regexp: '^([\w](?!.*\b{{ item }}\b).*)$'
+        replace: '\1 {{ item }}'
+      with_items:
+        - "cgroup_enable=cpuset"
+        - "cgroup_memory=1"
+        - "cgroup_enable=memory"
+      notify: reboot-node
+      when: ansible_distribution == 'Debian'
+
+    - name: Turn off swap
+      ansible.builtin.command: swapoff -a
+
+    - name: Disable swap
+      ansible.builtin.lineinfile:
+        path: /etc/dphys-swapfile
+        regexp: '^CONF_SWAPSIZE='
+        line: 'CONF_SWAPSIZE=0'
+        backup: yes
+
+    - name: Download K3s install script
+      ansible.builtin.get_url:
+        url: https://get.k3s.io
+        dest: "~/k3s_install.sh"
+        mode: a+x
+
+    - name: Install dependencies
+      ansible.builtin.apt:
+        name:
+          - iptables
+          - git
+          - nfs-common
+        update_cache: true
+
+
+- name: Configure storage node
+  hosts: storage
+  gather_facts: false
+  become: true
+
+  handlers:
+    - name: restart-nfs
+      ansible.builtin.service:
+        name: nfs-server
+        state: restarted
+
+  tasks:
+    - name: Install nfs-server
+      ansible.builtin.apt:
+        name: nfs-server
+
+    - name: Create NFS share directory
+      ansible.builtin.file:
+        dest: "/mnt/nfs_drive"
+        owner: root
+        group: "{{ ansible_user }}"
+        state: directory
+        mode: 0777
+        
+    # Put drives in raid 1
+    # Mount drive to /mnt/nfs_drive
+    
+    - name: Configure NFS exports
+      ansible.builtin.lineinfile:
+        dest: /etc/exports
+        line: "/mnt/nfs_drive *(rw,sync,no_root_squash)"
+        regexp: ".*"
+        create: true
+      notify: restart-nfs
+
+    - name: Ensure NFS is started and enabled at boot
+      ansible.builtin.service:
+        name: nfs-server
+        state: started
+        enabled: true
+
+
+- name: Configure control node
+  host: controller
+  gather_facts: false
+  become: true
+
+  tasks:
+    - name: Install K3s on controller
+      ansible.builtin.shell: >-
+        ~/k3s_install.sh --write-kubeconfig-mode 644 --disable servicelb --disable-cloud-controller --disable local-storage >> ~/k3s_install_log.txt
+      args:
+        chdir: "~"
+        creates: /var/lib/rancher/k3s/server/node-token
+
+    - name: Get node token
+      ansible.builtin.command: cat /var/lib/rancher/k3s/server/node-token
+      changed_when: false
+      register: node_token_output
+
+    - name: Set node_token fact.
+      ansible.builtin.set_fact:
+        node_token: "{{ node_token_output.stdout_lines[0] }}"
+
+    - name: Ignore PEP 668
+      ansible.builtin.file:
+        path: /usr/lib/python3.11/EXTERNALLY-MANAGED
+        state: absent
+
+
+- name: Configure worker nodes
+  hosts: nodes
+  gather_facts: false
+  become: true
+
+  tasks:
+    - name: Install K3s on nodes
+      ansible.builtin.shell: >-
+        K3S_URL="https://{{ groups['controller'][0] }}:6443"
+        K3S_TOKEN="{{ hostvars[groups['controller'][0]]['node_token'] }}"
+        ~/k3s_install.sh >> ~/k3s_install_log.txt
+      args:
+        chdir: "~"
+        creates: /var/lib/rancher/k3s/agent/kubelet.kubeconfig
