@@ -1,0 +1,8 @@
+- add SSH public key to authorised_keys
+- disable ssh password authentication
+- disable ssh root login (?)
+(https://docs.turingpi.com/docs/turing-pi2-bmc-how-to-get-started#increase-protection)
+
+- Set fixed ip
+- Set DNS
+(https://docs.turingpi.com/docs/turing-pi2-bmc-how-to-get-started#set-fixed-ip)

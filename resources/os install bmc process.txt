@@ -1,0 +1,10 @@
+- flash all nodes with raspbian 64-bit lite
+- mount all nodes as msd
+- For each node:
+    - Set hostname: turingpi-node1
+    - set user: pi
+    - add ssh public key
+    - disable ssh password auth
+    - set localization
+    - enable uart
+- restart nodes

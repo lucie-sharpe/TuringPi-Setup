@@ -1,0 +1,37 @@
+[Network Switch]
+https://www.realtek.com/Product/Index?id=3703&cate_id=194
+https://datasheet.lcsc.com/lcsc/2208101101_Realtek-Semicon-RTL8370N-VB-CG_C2803243.pdf
+https://github.com/turing-machines/BMC-Firmware/pull/125
+https://gist.github.com/CFSworks/45384c89266f2d3be9e54f0d03252863
+https://github.com/turing-machines/BMC-Firmware/pull/209
+https://docs.kernel.org/networking/dsa/dsa.html
+https://claude.ai/share/ce25b1d8-b7e4-44eb-a3f9-1d21df80d4d9
+
+[Fan Controller]
+https://ww1.microchip.com/downloads/aemDocuments/documents/MSLD/ProductDocuments/DataSheets/EMC2301-2-3-5-Data-Sheet-DS20006532A.pdf
+https://github.com/turing-machines/BMC-Firmware/pull/125
+https://github.com/turing-machines/bmcd/pull/88
+https://github.com/turing-machines/bmcd/pull/84
+
+[RPi CM4]
+https://github.com/turing-machines/BMC-Firmware/pull/166
+https://github.com/raspberrypi/usbboot
+https://github.com/raspberrypi/rpi-sb-provisioner
+https://github.com/RPi-Distro/pi-gen
+https://github.com/raspberrypi/rpi-image-gen
+https://github.com/RPi-Distro/raspi-config
+https://docs.turingpi.com/docs/tpi-uart#enabling-uart-in-raspberry-pi-os
+
+[BMC]
+https://github.com/turing-machines/bmc-Firmware/commit/5fd7d411d8b60b95f40158113ba4a66747df6100
+https://docs.turingpi.com/docs/tpi-uart#using-picocom
+https://docs.turingpi.com/docs/tpi-accessing-nodes-filesystems
+
+[TPI]
+https://github.com/turing-machines/tpi
+https://docs.turingpi.com/docs/tpi-usage
+
+[BMCD]
+https://github.com/turing-machines/bmcd
+https://docs.turingpi.com/docs/turing-pi2-bmc-api
+https://docs.turingpi.com/docs/turing-pi2-automating-node-and-usb-settings
