@@ -1,0 +1,4 @@
+---
+bmc_images_dir: /mnt/sdcard/images
+
+ssh_public_key: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOTzn/DBy068IHbZPIU9Tm2DqtmyeeNS34z9erFxfX3i lucie@luciesharpe.com

@@ -1,6 +1,7 @@
 ---
 - name: Upgrade cluster nodes.
   hosts: cluster
+  gather_facts: true
   become: true
 
   tasks:

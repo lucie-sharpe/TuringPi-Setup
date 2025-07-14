@@ -1,0 +1,51 @@
+---
+- name: Prepare BMC
+  hosts: bmc
+  gather_facts: false
+  become: true
+
+  vars:
+    sd_card_dir: /mnt/sdcard
+
+  tasks:
+    - name: Check if python is available
+      ansible.builtin.setup:
+      register: python_check
+      failed_when: false
+
+    - name: Setup python on BMC
+      when: python_check.ansible_facts is not defined
+      block:
+        - name: Check sdcard is mounted and formated as ext4
+          ansible.builtin.raw: "mountpoint -q {{ sd_card_dir }} && grep -q \"{{ sd_card_dir }} ext4\" /proc/mounts"
+          register: sd_mount_check
+          failed_when: false
+          changed_when: false
+
+        - name: Fail if SD card is not mounted
+          ansible.builtin.fail:
+            msg: "SD card must be inserted and formated to ext4. Python can not be loaded on BMC."
+          when: sd_mount_check.rc != 0
+
+        - name: Download and install pypy
+          ansible.builtin.script: install_pypy.sh
+          when: sd_mount_check.rc == 0
+
+        - name: Test python install
+          ansible.builtin.raw: python3 --version
+          when: sd_mount_check.rc == 0
+
+
+#- name: Configure BMC
+#  hosts: bmc
+#  gather_facts: true
+#  become: true
+#
+#  tasks:
+#    - name: Add SSH key authorisation
+#
+#    - name: Update SSH config
+#
+#    - name: Set static IP
+#
+#    - name: Set DNS
